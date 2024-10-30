@@ -21,4 +21,18 @@ public class EventService {
     public Event saveEvent(Event event) {
         return eventRepository.save(event);
     }
+
+
+    public String checkConnection() {
+        try {
+            long count = eventRepository.count();
+            return "Connected! Total events: " + count;
+        } catch (Exception e) {
+            return "Database connection failed: " + e.getMessage();
+        }
+    }
+
+
+
+
 }

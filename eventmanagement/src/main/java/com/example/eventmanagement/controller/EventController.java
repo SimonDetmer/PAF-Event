@@ -19,4 +19,9 @@ public class EventController {
     public List<Event> getEvents() {
         return eventService.getAllEvents();
     }
+
+    @GetMapping("/test-connection")
+    public String testConnection() {
+        return eventService.checkConnection();
+    }
 }
