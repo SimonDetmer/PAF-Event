@@ -1,22 +1,26 @@
 package com.example.eventmanagement.entities;
 
-import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity
-public class Event {
+public class Location {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private String location;
+    private int capacity;
 
-    @Embedded
-    private DateTime dateTime;
+    // Constructors
+    public Location() {}
+
+    public Location(String name, int capacity) {
+        this.name = name;
+        this.capacity = capacity;
+    }
 
     // Getters and Setters
     public Long getId() {
@@ -35,19 +39,16 @@ public class Event {
         this.name = name;
     }
 
-    public String getLocation() {
-        return location;
+    public int getCapacity() {
+        return capacity;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    public void setCapacity(int capacity) {
+        this.capacity = capacity;
     }
 
-    public DateTime getDateTime() {
-        return dateTime;
-    }
-
-    public void setDateTime(DateTime dateTime) {
-        this.dateTime = dateTime;
+    // Method to check availability based on requested capacity
+    public boolean checkAvailability(int requestedCapacity) {
+        return requestedCapacity <= this.capacity;
     }
 }
