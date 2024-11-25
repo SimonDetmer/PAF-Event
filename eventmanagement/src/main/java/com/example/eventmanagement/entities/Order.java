@@ -7,6 +7,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Transient;
+import java.math.BigDecimal;
 
 import java.util.List;
 
@@ -41,14 +42,16 @@ public class Order {
 
     // Methods
 
-    // Method to calculate the total price of the order
     public float calculateTotalPrice() {
-        float total = 0;
+        BigDecimal total = BigDecimal.ZERO; // Start with BigDecimal.ZERO
+
         for (Ticket ticket : listOfTickets) {
-            total += ticket.getPrice();
+            total = total.add(ticket.getPrice()); // Directly use BigDecimal from getPrice()
         }
-        return total;
+
+        return total.floatValue(); // Convert back to float if necessary
     }
+
 
     // Create the order and set the total price
     public void createOrder() {
