@@ -1,5 +1,6 @@
 package com.example.eventmanagement.entities;
 
+import com.example.eventmanagement.states.*;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 
@@ -15,21 +16,21 @@ public class Ticket {
     @Column(nullable = false)
     private BigDecimal price;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private TicketStatus status;
+    @Transient  // State is not persisted in the database
+    private TicketState state;
 
-    // Constructors, Getters, and Setters
-
+    // Constructors
     public Ticket() {
+        this.state = new AvailableState(); // Default state
     }
 
-    public Ticket(Long eventId, BigDecimal price, TicketStatus status) {
+    public Ticket(Long eventId, BigDecimal price) {
         this.eventId = eventId;
         this.price = price;
-        this.status = status;
+        this.state = new AvailableState(); // Default state
     }
 
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -54,24 +55,20 @@ public class Ticket {
         this.price = price;
     }
 
-    public TicketStatus getStatus() {
-        return status;
+    public TicketState getState() {
+        return state;
     }
 
-    public void setStatus(TicketStatus status) {
-        this.status = status;
+    public void setState(TicketState state) {
+        this.state = state;
     }
 
-    // Methods for ticket operations
+    // Delegating state-specific behaviors
     public void reserve() {
-        if (this.status == TicketStatus.AVAILABLE) {
-            this.status = TicketStatus.RESERVED;
-        }
+        state.reserve(this);
     }
 
     public void purchase() {
-        if (this.status == TicketStatus.RESERVED) {
-            this.status = TicketStatus.PURCHASED;
-        }
+        state.purchase(this);
     }
 }
