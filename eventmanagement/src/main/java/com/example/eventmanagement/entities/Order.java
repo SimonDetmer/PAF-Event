@@ -1,14 +1,7 @@
 package com.example.eventmanagement.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Transient;
+import jakarta.persistence.*;
 import java.math.BigDecimal;
-
 import java.util.List;
 
 @Entity
@@ -19,18 +12,18 @@ public class Order {
     private Long id;
 
     @ManyToOne
-    private User user;  // Relationship to the User entity
+    private User user;
 
     @ManyToOne
-    private Event event;  // Relationship to the Event entity
+    private Event event;
 
     @OneToMany
-    private List<Ticket> listOfTickets;  // List of Tickets related to this Order
+    private List<Ticket> listOfTickets;
 
     @Transient
-    private float totalPrice;  // Temporary field, calculated dynamically
+    private BigDecimal totalPrice;
 
-    // Constructor
+    // Constructors
     public Order() {}
 
     public Order(User user, Event event, List<Ticket> listOfTickets) {
@@ -40,34 +33,49 @@ public class Order {
         this.totalPrice = calculateTotalPrice();
     }
 
-    // Methods
+    // Method to calculate the total price of the order
+    public BigDecimal calculateTotalPrice() {
+        return listOfTickets.stream()
+                .map(Ticket::getPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
 
-    public float calculateTotalPrice() {
-        BigDecimal total = BigDecimal.ZERO; // Start with BigDecimal.ZERO
+    // 1. Create Order
+    public void createOrder(User user, Event event, List<Ticket> tickets) {
+        if (tickets == null || tickets.isEmpty()) {
+            throw new IllegalArgumentException("Cannot create an order without tickets.");
+        }
+        this.user = user;
+        this.event = event;
+        this.listOfTickets = tickets;
+        this.totalPrice = calculateTotalPrice();
+        System.out.println("Order created successfully with total price: " + totalPrice);
+    }
 
-        for (Ticket ticket : listOfTickets) {
-            total = total.add(ticket.getPrice()); // Directly use BigDecimal from getPrice()
+    // 2. Finalize Order
+    public void finalizeOrder() {
+        if (listOfTickets == null || listOfTickets.isEmpty()) {
+            throw new IllegalStateException("Cannot finalize an order without tickets.");
         }
 
-        return total.floatValue(); // Convert back to float if necessary
+        // Simulate ticket reservation or payment logic
+        for (Ticket ticket : listOfTickets) {
+            ticket.purchase(); // Mark tickets as purchased
+        }
+        System.out.println("Order finalized successfully.");
     }
 
-
-    // Create the order and set the total price
-    public void createOrder() {
-        // You can add order creation logic here, such as checking availability
-        this.totalPrice = calculateTotalPrice();
-    }
-
-    // Finalize the order (e.g., confirm purchase, initiate payment)
-    public void finalizeOrder() {
-        // Logic to finalize the order (could involve payment or sending confirmation)
-    }
-
-    // Cancel the order (e.g., free up tickets, refund)
+    // 3. Cancel Order
     public void cancelOrder() {
-        // Logic to cancel the order
-        // Optionally, refund the user and free the tickets
+        if (listOfTickets == null || listOfTickets.isEmpty()) {
+            throw new IllegalStateException("Cannot cancel an order without tickets.");
+        }
+
+        // Release tickets back to the system
+        for (Ticket ticket : listOfTickets) {
+            ticket.reserve(); // Reset ticket status to reserved
+        }
+        System.out.println("Order cancelled successfully. Tickets are released back to the system.");
     }
 
     // Getters and Setters
@@ -103,11 +111,11 @@ public class Order {
         this.listOfTickets = listOfTickets;
     }
 
-    public float getTotalPrice() {
+    public BigDecimal getTotalPrice() {
         return totalPrice;
     }
 
-    public void setTotalPrice(float totalPrice) {
+    public void setTotalPrice(BigDecimal totalPrice) {
         this.totalPrice = totalPrice;
     }
 }
